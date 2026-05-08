@@ -30,7 +30,7 @@ final class ScreenCapturer: NSObject {
         if stream != nil { return }
 
         let content = try await SCShareableContent.excludingDesktopWindows(
-            false, onScreenWindowsOnly: true
+            false, onScreenWindowsOnly: false
         )
 
         // 选主屏（含原点的那个）
@@ -42,10 +42,28 @@ final class ScreenCapturer: NSObject {
             )
         }
 
-        // 排除自己的覆盖窗口
+        // 排除自己的覆盖窗口。
+        //
+        // 注意：overlay 默认是隐藏的，按住热键才 orderFront。如果这里用
+        // onScreenWindowsOnly=true，SCShareableContent 启动时看不到这个隐藏窗口，
+        // excluded 会变成空数组；配合 window.sharingType=.readOnly 后，我们自己的
+        // 抓帧就会拍到 overlay 本身，形成递归，用户体感就是 zoom 又“失效”了。
         let excluded = content.windows.filter { excludingWindowIDs.contains(CGWindowID($0.windowID)) }
 
-        let filter = SCContentFilter(display: display, excludingWindows: excluded)
+        let filter: SCContentFilter
+        if !excluded.isEmpty {
+            filter = SCContentFilter(display: display, excludingWindows: excluded)
+        } else if let currentApp = content.applications.first(where: {
+            $0.processID == ProcessInfo.processInfo.processIdentifier
+        }) {
+            // 兜底：如果系统没有把隐藏 overlay 窗口列出来，就排除整个当前 App。
+            // 这只影响本 App 自己的 ScreenCaptureKit 流，不影响 OBS/系统录屏捕获 overlay。
+            NSLog("[快捷高光] 未匹配到 overlay windowID，改用排除当前 App 防止自抓帧递归。")
+            filter = SCContentFilter(display: display, excludingApplications: [currentApp], exceptingWindows: [])
+        } else {
+            NSLog("[快捷高光] 未匹配到 overlay windowID/currentApp，继续启动抓帧但可能出现自抓帧递归。")
+            filter = SCContentFilter(display: display, excludingWindows: [])
+        }
 
         // ⚠️ 重要：SCDisplay.width / .height 已经是物理像素（不是点）。
         // 之前写 `display.width * 2` 实际造成了 4×超采样，scaleX 算成 4.0，
