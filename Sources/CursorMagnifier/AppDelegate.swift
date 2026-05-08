@@ -259,7 +259,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         window.hasShadow = false
         window.ignoresMouseEvents = true
         window.collectionBehavior = [.canJoinAllSpaces, .stationary, .ignoresCycle, .fullScreenAuxiliary]
-        window.sharingType = .none
+        // Allow OBS / screen recorders to capture the highlight overlay.
+        // Our own ScreenCaptureKit stream still excludes this window by ID,
+        // so the lens won't recursively capture itself.
+        window.sharingType = .readOnly
         let view = OverlayView(frame: NSRect(origin: .zero, size: screen.frame.size))
         window.contentView = view
         window.orderOut(nil)
