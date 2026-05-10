@@ -60,7 +60,7 @@
 要求：**macOS 14+** + Xcode Command Line Tools (`xcode-select --install`)
 
 ```bash
-git clone https://github.com/Daknniel-0881/quickhighlight.git
+git clone https://github.com/Daknniel-0881/qulv-quickhighlight.git
 cd quickhighlight
 bash build_app.sh
 ```
@@ -345,3 +345,11 @@ QH_OPEN_SETTINGS=1 QH_TAB=magnifier ./.build/release/CursorMagnifier
 ## 📝 License
 
 [MIT](LICENSE) © 2026 Daknniel-0881
+
+## 关于本仓库与曲率企业 AI 服务
+
+本仓库开源分享 **qulv-quickhighlight**：macOS 屏幕局部放大工具，服务录屏、演示、教学和软件讲解场景。曲率提供企业 AI 培训、企业 AI 转型咨询、落地工具搭建、AI 工具定制及 Skill 定制、企业 AI 转型全程陪跑，帮助团队把 AI 从演示样例落到真实业务流程中。
+
+感兴趣可扫码添加微信：
+
+![曲率企业 AI 服务海报](assets/qulv/qulv-ai-business-poster-readme.png)
